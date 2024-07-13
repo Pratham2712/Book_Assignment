@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import { authRouter } from "./src/routes/authRouter.js";
+import { bookRouter } from "./src/routes/bookRouter.js";
 
 
 
@@ -34,6 +35,7 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/auth", authRouter);
+app.use("/book", bookRouter);
 
 app.listen(8000, () => {
     console.log("Listening on port 8000");
