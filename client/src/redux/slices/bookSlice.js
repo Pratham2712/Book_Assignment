@@ -15,6 +15,17 @@ export const getBooksThunk = createAsyncThunk(
       }
     }
   );
+export const getSearchThunk = createAsyncThunk(
+    "/book/getSearch",
+    async (data) => {
+      try {
+        const res = await axios.post(`${BASE_URL}/book/getSearch`,data);
+        return res.data;
+      } catch (error) {
+        return error.response.data;
+      }
+    }
+  );
 
   const initialState = {
     loading : false,
@@ -72,8 +83,35 @@ export const getBooksThunk = createAsyncThunk(
         state.loading = false;
         state.errorData.message = action.error.message;
       })
+  
+  //getSearchThunk======================================================================================================================
+  .addCase(getSearchThunk.pending, (state, { payload }) => {
+    state.loading = true;
+  })
+  .addCase(getSearchThunk.fulfilled, (state, { payload }) => {
+    switch (payload.type) {
+      case SUCCESS:
+        state.data.book = payload.data;
+        state.loading = false;
+        state.status.getSearchThunk = FULFILLED;
+        break;
+      default:
+        state.loading = false;
+        state.errorData = {
+          message: payload.message,
+          type: payload.type,
+          errors: payload.errors,
+        };
+        break;
     }
   })
+  .addCase(getSearchThunk.rejected, (state, action) => {
+    state.status.getSearchThunk = ERROR;
+    state.loading = false;
+    state.errorData.message = action.error.message;
+  })
+}
+})
 
   export default bookSlice.reducer;
 export const { clearErrorSlice } = bookSlice.actions;

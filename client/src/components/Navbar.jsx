@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -12,11 +12,12 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { USER_Root } from "../constants/links.js";
 import Login from "../pages/Login.jsx";
 import { logoutThunk } from "../redux/slices/UserInfoSlice.js";
+import { getSearchThunk } from "../redux/slices/bookSlice.js";
 
 
 const Search = styled("div")(({ theme }) => ({
@@ -72,6 +73,20 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  //function
+  const getResult = (data) => {
+    setSearchParams({ query: data.value });
+  };
+ //useEffect
+ useEffect(() => {
+  const query = searchParams.get("query");
+    
+      dispatch(getSearchThunk({ word: query }));
+    
+ },[searchParams.get("query")])
+
   //useSelector
   const isLogin = useSelector(
     (state) => state.rootReducer.UserInfoSlice.isLogin
@@ -214,7 +229,8 @@ const Navbar = () => {
               <StyledInputBase
                 placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
-                //onChange={(e) => getResult(e.target)}
+                onChange={(e) => getResult(e.target)}
+                value={searchParams.get("query")}
               />
             </Search>
 
