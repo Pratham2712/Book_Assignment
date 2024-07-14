@@ -1,9 +1,9 @@
-import { Box, Grid, LinearProgress } from "@mui/material";
+import { Box, Grid, LinearProgress, Pagination, Stack } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBooksThunk } from "../redux/slices/bookSlice";
 import BookCard from "./BookCard";
-import { useSearchParams } from "react-router-dom";
+import { createSearchParams, useSearchParams } from "react-router-dom";
 
 const Books = () => {
     const dispatch = useDispatch();
@@ -11,15 +11,37 @@ const Books = () => {
 
     //use effect
     useEffect(() => {
-        if(searchParams.get("query") == ""){
-            dispatch(getBooksThunk());
-        }
+        pageParams(
+            searchParams.get("page") || 1,
+            searchParams.get("pagesize") || 4
+          );
+          const data = {
+            page: searchParams.get("page") - 1 || 0,
+            pagesize: searchParams.get("pagesize") || 4,
+            word: searchParams.get("query") || "",
+          };
+            dispatch(getBooksThunk(data));
+        
+    },[searchParams.get("page"), searchParams.get("pagesize"),searchParams.get("query")])
+    useEffect(() => {
+        const params = Object.fromEntries(searchParams);
+        params["page"] = 1;
+        params["pagesize"] = 4;
+        setSearchParams(createSearchParams(params));
     },[])
     //useSelector
     const books = useSelector(
-        (state) => state.rootReducer.bookSlice.data.book
+        (state) => state.rootReducer.bookSlice.data.book.data
     );
     const loading = useSelector((state) => state.rootReducer.bookSlice.loading);
+    const total = useSelector((state) => state.rootReducer.bookSlice.data.book.total);
+    //function
+    const pageParams = (page, pageSize) => {
+        const params = Object.fromEntries(searchParams);
+        params["page"] = page;
+        params["pagesize"] = pageSize;
+        setSearchParams(createSearchParams(params));
+      };
 
     return (
         <Box sx={{paddingTop:"7rem"}}>
@@ -32,7 +54,7 @@ const Books = () => {
                 
              (   <Grid container spacing={{ xs: 1, md: 3 }}  sx={{justifyContent:"center"}} >
                 {
-                    books.map((data,index) => {
+                    books?.map((data,index) => {
                         return (
                             <Grid item  key={index}>
                             <BookCard data={data}/>
@@ -41,6 +63,25 @@ const Books = () => {
                     })
                 }
             </Grid>)}
+            <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignContent: "center",
+          width: "100%",
+        }}
+      >
+        <Stack spacing={2}>
+          <Pagination
+            count={total}
+            onChange={(e, value) => {
+              pageParams(parseInt(value), 4);
+            }}
+            color="secondary"
+            page={parseInt(searchParams.get("page"))}
+          />
+        </Stack>
+      </Box>
         </Box>
     )
 }

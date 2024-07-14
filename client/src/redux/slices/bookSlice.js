@@ -8,7 +8,7 @@ export const getBooksThunk = createAsyncThunk(
     "/book/getBook",
     async (data) => {
       try {
-        const res = await axios.get(`${BASE_URL}/book/getBook`);
+        const res = await axios.post(`${BASE_URL}/book/getBook`,data);
         return res.data;
       } catch (error) {
         return error.response.data;
@@ -41,6 +41,7 @@ export const getSearchThunk = createAsyncThunk(
       isError: false,
       data:{
         book:[],
+        total:0,
       },
       status:{
         getBooksThunk:IDLE
@@ -65,6 +66,7 @@ export const getSearchThunk = createAsyncThunk(
         switch (payload.type) {
           case SUCCESS:
             state.data.book = payload.data;
+            state.data.total = payload.total;
             state.loading = false;
             state.status.getBooksThunk = FULFILLED;
             break;
