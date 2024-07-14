@@ -44,7 +44,7 @@ const Books = () => {
       };
 
     return (
-        <Box sx={{paddingTop:"7rem"}}>
+        <Box sx={{paddingTop:"2rem"}}>
             {loading ? (<Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
       <LinearProgress
       color="inherit"

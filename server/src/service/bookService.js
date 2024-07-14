@@ -17,3 +17,7 @@ export const getBookService = async (data) => {
     return { total: Math.ceil(total / pagesize), data: res };
   }
 
+  export const getFilterService = async () => {
+    const res = await bookModel.find({}, 'author language');
+    return res;
+  }
