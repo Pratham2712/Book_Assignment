@@ -1,7 +1,10 @@
 import { Box, Card, CardContent, CardMedia, Typography } from "@mui/material";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { bookPage } from "../constants/links.js";
 
 const BookCard = ({data}) => {
+  const navigate = useNavigate();
     return (
         <Box>
             <Card  sx={{
@@ -15,8 +18,13 @@ const BookCard = ({data}) => {
         boxShadow:
           "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
         position: "relative",
-        cursor: "pointer",
-      }}>
+        cursor: "pointer",  
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(bookPage(data?._id));
+      }}
+      >
             <img
           src={data?.cover?.[0]}
           alt=""

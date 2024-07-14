@@ -6,70 +6,81 @@ import BookCard from "./BookCard";
 import { createSearchParams, useSearchParams } from "react-router-dom";
 
 const Books = () => {
-    const dispatch = useDispatch();
-    const [searchParams, setSearchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-    //use effect
-    useEffect(() => {
-        pageParams(
-            searchParams.get("page") || 1,
-            searchParams.get("pagesize") || 4
-          );
-          const data = {
-            page: searchParams.get("page") - 1 || 0,
-            pagesize: searchParams.get("pagesize") || 4,
-            word: searchParams.get("query") || "",
-          };
-          if (searchParams.get("author")) {
-            data.author = searchParams.get("author").split(",");
-          }
-          if (searchParams.get("language")) {
-            data.language = searchParams.get("language").split(",");
-          }
-            dispatch(getBooksThunk(data));
-        
-    },[searchParams.get("page"), searchParams.get("pagesize"),searchParams.get("query"),searchParams.get("author"),searchParams.get("language")])
-    useEffect(() => {
-        const params = Object.fromEntries(searchParams);
-        params["page"] = 1;
-        params["pagesize"] = 4;
-        setSearchParams(createSearchParams(params));
-    },[])
-    //useSelector
-    const books = useSelector(
-        (state) => state.rootReducer.bookSlice.data.book.data
+  //use effect
+  useEffect(() => {
+    pageParams(
+      searchParams.get("page") || 1,
+      searchParams.get("pagesize") || 4
     );
-    const loading = useSelector((state) => state.rootReducer.bookSlice.loading);
-    const total = useSelector((state) => state.rootReducer.bookSlice.data.book.total);
-    //function
-    const pageParams = (page, pageSize) => {
-        const params = Object.fromEntries(searchParams);
-        params["page"] = page;
-        params["pagesize"] = pageSize;
-        setSearchParams(createSearchParams(params));
-      };
+    const data = {
+      page: searchParams.get("page") - 1 || 0,
+      pagesize: searchParams.get("pagesize") || 4,
+      word: searchParams.get("query") || "",
+    };
+    if (searchParams.get("author")) {
+      data.author = searchParams.get("author").split(",");
+    }
+    if (searchParams.get("language")) {
+      data.language = searchParams.get("language").split(",");
+    }
+    dispatch(getBooksThunk(data));
+  }, [
+    searchParams.get("page"),
+    searchParams.get("pagesize"),
+    searchParams.get("query"),
+    searchParams.get("author"),
+    searchParams.get("language"),
+  ]);
+  useEffect(() => {
+    const params = Object.fromEntries(searchParams);
+    params["page"] = 1;
+    params["pagesize"] = 4;
+    setSearchParams(createSearchParams(params));
+  }, []);
+  //useSelector
+  const books = useSelector(
+    (state) => state.rootReducer.bookSlice.data.book.data
+  );
+  const loading = useSelector((state) => state.rootReducer.bookSlice.loading);
+  const total = useSelector(
+    (state) => state.rootReducer.bookSlice.data.book.total
+  );
+  //function
+  const pageParams = (page, pageSize) => {
+    const params = Object.fromEntries(searchParams);
+    params["page"] = page;
+    params["pagesize"] = pageSize;
+    setSearchParams(createSearchParams(params));
+  };
 
-    return (
-        <Box sx={{paddingTop:"2rem"}}>
-            {loading ? (<Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
-      <LinearProgress
-      color="inherit"
-        sx={{ top: "30%", zIndex: "100", width: "30%", left: "35%"  }}
-      />
-    </Box>):
-                
-             (   <Grid container spacing={{ xs: 1, md: 3 }}  sx={{justifyContent:"center"}} >
-                {
-                    books?.map((data,index) => {
-                        return (
-                            <Grid item  key={index}>
-                            <BookCard data={data}/>
-                            </Grid>
-                        )
-                    })
-                }
-            </Grid>)}
-            <Box
+  return (
+    <Box sx={{ paddingTop: "2rem" }}>
+      {loading ? (
+        <Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
+          <LinearProgress
+            color="inherit"
+            sx={{ top: "30%", zIndex: "100", width: "30%", left: "35%" }}
+          />
+        </Box>
+      ) : (
+        <Grid
+          container
+          spacing={{ xs: 1, md: 3 }}
+          sx={{ justifyContent: "center" }}
+        >
+          {books?.map((data, index) => {
+            return (
+              <Grid item key={index}>
+                <BookCard data={data} />
+              </Grid>
+            );
+          })}
+        </Grid>
+      )}
+      <Box
         sx={{
           display: "flex",
           justifyContent: "center",
@@ -88,8 +99,8 @@ const Books = () => {
           />
         </Stack>
       </Box>
-        </Box>
-    )
-}
+    </Box>
+  );
+};
 
 export default Books;

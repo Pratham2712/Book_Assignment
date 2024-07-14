@@ -28,3 +28,8 @@ export const getBookService = async (data) => {
     const res = await bookModel.find({}, 'author language');
     return res;
   }
+
+  export const getBookDetailService = async ({ book_id }) => {
+    const res = await bookModel.findById(book_id);
+    return res;
+  };
