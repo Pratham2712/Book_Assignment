@@ -94,7 +94,6 @@ export const getFilterThunk = createAsyncThunk(
       .addCase(getFilterThunk.fulfilled, (state, { payload }) => {
         switch (payload.type) {
           case SUCCESS:
-            console.log(payload.data)
             state.data.filter = payload.data;
             state.loading = false;
             state.status.getFilterThunk = FULFILLED;

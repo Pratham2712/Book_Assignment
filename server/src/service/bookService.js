@@ -9,6 +9,13 @@ export const getBookService = async (data) => {
         { description: { $regex: new RegExp(".*" + keyword + ".*", "i") } },
       ],
     };
+    if (data.author.length > 0) {
+      query.author = { $in: data.author };
+    }
+
+    if (data.language.length > 0) {
+      query.language = { $in: data.language };
+    }
   const total = await bookModel.find(query).count();
   const pagesize = data.pagesize || 4;
   const page = data.page || 0;

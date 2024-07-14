@@ -2,7 +2,6 @@ import { Box, Card, CardContent, CardMedia, Typography } from "@mui/material";
 import React from "react";
 
 const BookCard = ({data}) => {
-    console.log(data);
     return (
         <Box>
             <Card  sx={{

@@ -20,9 +20,15 @@ const Books = () => {
             pagesize: searchParams.get("pagesize") || 4,
             word: searchParams.get("query") || "",
           };
+          if (searchParams.get("author")) {
+            data.author = searchParams.get("author").split(",");
+          }
+          if (searchParams.get("language")) {
+            data.language = searchParams.get("language").split(",");
+          }
             dispatch(getBooksThunk(data));
         
-    },[searchParams.get("page"), searchParams.get("pagesize"),searchParams.get("query")])
+    },[searchParams.get("page"), searchParams.get("pagesize"),searchParams.get("query"),searchParams.get("author"),searchParams.get("language")])
     useEffect(() => {
         const params = Object.fromEntries(searchParams);
         params["page"] = 1;
