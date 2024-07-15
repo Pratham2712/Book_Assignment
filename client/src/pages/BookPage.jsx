@@ -84,6 +84,7 @@ const BookPage = () => {
   const onSubmit = (data) => {
     if (!isLogin) {
       return setLoginOpen(!loginOpen);
+    } else {
     }
   };
   return (
@@ -137,16 +138,15 @@ const BookPage = () => {
               </Box>
             </Box>
             <Box>
-              <Box>
+              <Box sx={{ marginBottom: "0.5rem" }}>
                 <Typography>Review</Typography>
                 <span>
                   <Rating
-                    name="half-rating"
+                    name="rating"
                     size="large"
                     {...register("rating")}
                     onBlur={handleBlur}
                     onChange={(event, newValue) => {
-                      console.log(newValue);
                       setValue("rating", newValue);
                       trigger("rating");
                     }}
@@ -157,13 +157,14 @@ const BookPage = () => {
                 <TextField
                   id="outlined-multiline-flexible"
                   label="Comment"
+                  name="comment"
                   multiline
                   rows={4}
                   size="large"
                   sx={{ width: "50%" }}
                   {...register("comment")}
                   onBlur={handleBlur}
-                  onChange={(e) => handleUsernameChange(e, "comment")}
+                  //onChange={(e) => handleUsernameChange(e, "comment")}
                 />
                 <Typography sx={{ height: "1.5rem", fontSize: "0.8rem" }}>
                   <ErrorMessage
@@ -180,7 +181,6 @@ const BookPage = () => {
                   background: "#000814",
                   border: "2px solid #000814",
                   fontWeight: "bold",
-                  marginTop: "0.5rem",
                   "&:hover": {
                     backgroundColor: "white",
                     color: "#000814",
