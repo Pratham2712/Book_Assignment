@@ -1,17 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { getBookDetailThunk } from "../redux/slices/bookPageSlice";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import * as yup from "yup";
+
 import {
   Box,
+  Button,
   LinearProgress,
   Rating,
   TextField,
   Typography,
 } from "@mui/material";
 import Navbar from "../components/Navbar";
+import { ErrorMessage } from "@hookform/error-message";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import Login from "./Login";
 
 const BookPage = () => {
+  const [loginOpen, setLoginOpen] = useState(false);
   const { id } = useParams();
   const dispatch = useDispatch();
   //useSelector
@@ -20,6 +28,9 @@ const BookPage = () => {
   );
   const data = useSelector(
     (state) => state.rootReducer.bookPageSlice.data.detail
+  );
+  const isLogin = useSelector(
+    (state) => state.rootReducer.UserInfoSlice.isLogin
   );
   const date = new Date(data.publishedDate);
   const formattedDate = date.toLocaleDateString("en-US", {
@@ -35,8 +46,48 @@ const BookPage = () => {
     };
     dispatch(getBookDetailThunk(data));
   }, []);
+
+  //schema
+  const schema = yup.object().shape({
+    comment: yup
+      .string()
+      .min(5, "comment must contain 3 letters")
+      .max(50, "comment cannot exceed 50 letters"),
+    rating: yup.number(),
+  });
+
+  //useForm
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+    setValue,
+    setError,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      comment: "",
+      rating: 0,
+    },
+  });
+
+  //function
+  const handleBlur = async (e) => {
+    await trigger(e.target.name);
+  };
+  const handleUsernameChange = (event, name) => {
+    setValue(name, event.target.value); // Update the value of the username field
+    trigger(name); // Trigger validation when the username value changes
+  };
+
+  const onSubmit = (data) => {
+    if (!isLogin) {
+      return setLoginOpen(!loginOpen);
+    }
+  };
   return (
-    <Box sx={{ paddingTop: "2rem" }}>
+    <Box sx={{ paddingTop: "2rem", overflowY: "auto" }}>
       <Navbar />
       {loading ? (
         <Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
@@ -89,7 +140,17 @@ const BookPage = () => {
               <Box>
                 <Typography>Review</Typography>
                 <span>
-                  <Rating name="half-rating" size="large" />
+                  <Rating
+                    name="half-rating"
+                    size="large"
+                    {...register("rating")}
+                    onBlur={handleBlur}
+                    onChange={(event, newValue) => {
+                      console.log(newValue);
+                      setValue("rating", newValue);
+                      trigger("rating");
+                    }}
+                  />
                 </span>
               </Box>
               <Box>
@@ -100,12 +161,42 @@ const BookPage = () => {
                   rows={4}
                   size="large"
                   sx={{ width: "50%" }}
+                  {...register("comment")}
+                  onBlur={handleBlur}
+                  onChange={(e) => handleUsernameChange(e, "comment")}
                 />
+                <Typography sx={{ height: "1.5rem", fontSize: "0.8rem" }}>
+                  <ErrorMessage
+                    errors={errors}
+                    name="comment"
+                    render={({ message }) => (
+                      <span style={{ color: "maroon" }}>{message}</span>
+                    )}
+                  />
+                </Typography>
               </Box>
+              <Button
+                sx={{
+                  background: "#000814",
+                  border: "2px solid #000814",
+                  fontWeight: "bold",
+                  marginTop: "0.5rem",
+                  "&:hover": {
+                    backgroundColor: "white",
+                    color: "#000814",
+                    border: "2px solid #000814",
+                  },
+                }}
+                variant="contained"
+                onClick={handleSubmit(onSubmit)}
+              >
+                Post
+              </Button>
             </Box>
           </Box>
         </Box>
       )}
+      <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen}></Login>
     </Box>
   );
 };
