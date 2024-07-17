@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   checkCommentThunk,
   commentThunk,
+  editCommentThunk,
   getBookDetailThunk,
 } from "../redux/slices/bookPageSlice";
 import { useParams } from "react-router-dom";
@@ -9,10 +10,13 @@ import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 
 import {
+  Alert,
   Box,
   Button,
+  Divider,
   LinearProgress,
   Rating,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -21,9 +25,19 @@ import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Login from "./Login";
+import { SUCCESS } from "../constants/constants";
 
 const BookPage = () => {
   const [loginOpen, setLoginOpen] = useState(false);
+  const [successMsg, setSuccessMsg] = useState({ type: false, msg: "" });
+  const [state, setState] = useState({
+    open: false,
+    vertical: "top",
+    horizontal: "center",
+  });
+  const { vertical, horizontal, open } = state;
+  const [expanded, setExpanded] = useState(false);
+
   const { id } = useParams();
   const dispatch = useDispatch();
   //useSelector
@@ -33,6 +47,16 @@ const BookPage = () => {
   const data = useSelector(
     (state) => state.rootReducer.bookPageSlice.data.detail
   );
+  const wordsArray = data?.description?.split(" ");
+  const maxWords = 70;
+  const displayText = expanded
+    ? data?.description
+    : wordsArray?.slice(0, maxWords).join(" ");
+  const userComment = useSelector(
+    (state) => state.rootReducer.bookPageSlice.data.comment[0]
+  );
+  const [rate, setRate] = useState(userComment?.rating || 0);
+  const [text, setText] = useState(userComment?.comment || "");
   const isLogin = useSelector(
     (state) => state.rootReducer.UserInfoSlice.isLogin
   );
@@ -42,16 +66,19 @@ const BookPage = () => {
     month: "long",
     day: "numeric",
   });
-
   //useEffect
   useEffect(() => {
     const data = {
       book_id: id,
     };
     dispatch(getBookDetailThunk(data));
-    //dispatch(checkCommentThunk(data));
   }, []);
-
+  useEffect(() => {
+    setRate(userComment?.rating);
+    setText(userComment?.comment);
+    setValue("rating", userComment?.rating);
+    setValue("comment", userComment?.comment);
+  }, [userComment]);
   useEffect(() => {
     const data = {
       bookId: id,
@@ -61,13 +88,12 @@ const BookPage = () => {
 
   //schema
   const schema = yup.object().shape({
-    comment: yup
-      .string()
-      .min(5, "comment must contain 3 letters")
-      .max(50, "comment cannot exceed 50 letters"),
+    comment: yup.string(),
+    // .min(5, "comment must contain 3 letters")
+    // .max(50, "comment cannot exceed 50 letters"),
     rating: yup.number(),
   });
-
+  console.log(text, rate);
   //useForm
   const {
     register,
@@ -79,18 +105,14 @@ const BookPage = () => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      comment: "",
-      rating: 0,
+      comment: userComment?.comment,
+      rating: userComment?.rating,
     },
   });
 
   //function
   const handleBlur = async (e) => {
     await trigger(e.target.name);
-  };
-  const handleUsernameChange = (event, name) => {
-    setValue(name, event.target.value); // Update the value of the username field
-    trigger(name); // Trigger validation when the username value changes
   };
 
   const onSubmit = (data) => {
@@ -102,12 +124,67 @@ const BookPage = () => {
     if (!isLogin) {
       return setLoginOpen(!loginOpen);
     } else {
-      console.log(data);
-      dispatch(commentThunk(info));
+      if (!userComment && (data?.comment || data?.rating)) {
+        dispatch(commentThunk(info)).then((data) => {
+          if (data.payload.type === SUCCESS) {
+            dispatch(checkCommentThunk({ bookId: id }));
+            setSuccessMsg((prevSuccessMsg) => ({
+              ...prevSuccessMsg,
+              type: true,
+              msg: "Comment posted successfully",
+            }));
+          }
+        });
+      } else {
+        if (
+          (userComment?.comment != data?.comment ||
+            userComment?.rating != data?.rating) &&
+          (data?.comment || data?.rating)
+        ) {
+          dispatch(editCommentThunk(info)).then((data) => {
+            console.log(data.payload.type);
+            if (data.payload.type === SUCCESS) {
+              dispatch(checkCommentThunk({ bookId: id }));
+              setSuccessMsg((prevSuccessMsg) => ({
+                ...prevSuccessMsg,
+                type: true,
+                msg: "Comment edited successfully",
+              }));
+            }
+          });
+        }
+      }
     }
   };
   return (
-    <Box sx={{ paddingTop: "2rem", overflowY: "auto" }}>
+    <Box sx={{ paddingTop: "3rem", overflowY: "auto" }}>
+      <Snackbar
+        open={successMsg.type}
+        anchorOrigin={{ vertical, horizontal }}
+        autoHideDuration={2000}
+        onClose={() => {
+          setSuccessMsg((prevSuccessMsg) => ({
+            ...prevSuccessMsg,
+            type: false,
+            msg: "",
+          }));
+        }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
+          onClose={() => {
+            setSuccessMsg((prevSuccessMsg) => ({
+              ...prevSuccessMsg,
+              type: false,
+              msg: "",
+            }));
+          }}
+          sx={{ width: "100%" }}
+        >
+          {successMsg.msg}
+        </Alert>
+      </Snackbar>
       <Navbar />
       {loading ? (
         <Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
@@ -141,7 +218,25 @@ const BookPage = () => {
             }}
           >
             <Typography variant="h4">{data?.title}</Typography>
-            <Typography>{data?.description}</Typography>
+            <Typography sx={{ heigth: "2 rem" }}>
+              {displayText}
+              {!expanded && wordsArray?.length > maxWords && (
+                <span
+                  onClick={() => setExpanded(!expanded)}
+                  style={{ cursor: "pointer", color: "blue" }}
+                >
+                  &nbsp;... Read more
+                </span>
+              )}
+              {expanded && (
+                <span
+                  onClick={() => setExpanded(!expanded)}
+                  style={{ cursor: "pointer", color: "blue" }}
+                >
+                  &nbsp; Show less
+                </span>
+              )}
+            </Typography>
             <Box sx={{ display: "flex", justifyContent: "space-around" }}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Typography variant="h6">Published Date : </Typography>
@@ -161,13 +256,14 @@ const BookPage = () => {
                 <Typography>Review</Typography>
                 <span>
                   <Rating
-                    name="rating"
                     size="large"
                     {...register("rating")}
                     onBlur={handleBlur}
+                    value={rate}
                     onChange={(event, newValue) => {
                       setValue("rating", newValue);
                       trigger("rating");
+                      setRate(newValue);
                     }}
                   />
                 </span>
@@ -175,7 +271,7 @@ const BookPage = () => {
               <Box>
                 <TextField
                   id="outlined-multiline-flexible"
-                  label="Comment"
+                  label={userComment?.comment ? "" : "Comment"}
                   name="comment"
                   multiline
                   rows={4}
@@ -183,7 +279,12 @@ const BookPage = () => {
                   sx={{ width: "50%" }}
                   {...register("comment")}
                   onBlur={handleBlur}
-                  //onChange={(e) => handleUsernameChange(e, "comment")}
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    setValue("comment", e.target.value);
+                    trigger("comment");
+                  }}
                 />
                 <Typography sx={{ height: "1.5rem", fontSize: "0.8rem" }}>
                   <ErrorMessage
@@ -209,12 +310,30 @@ const BookPage = () => {
                 variant="contained"
                 onClick={handleSubmit(onSubmit)}
               >
-                Post
+                {userComment?.comment || userComment?.rating ? "Edit" : "Post"}
               </Button>
             </Box>
           </Box>
         </Box>
       )}
+      <Button
+        sx={{
+          background: "#000814",
+          border: "2px solid #000814",
+          fontWeight: "bold",
+          marginLeft: "2.5rem",
+          "&:hover": {
+            backgroundColor: "white",
+            color: "#000814",
+            border: "2px solid #000814",
+          },
+        }}
+        variant="contained"
+        //onClick={handleSubmit(onSubmit)}
+      >
+        All Comments
+      </Button>
+      <Divider />
       <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen}></Login>
     </Box>
   );

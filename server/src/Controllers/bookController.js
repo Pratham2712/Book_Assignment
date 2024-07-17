@@ -2,6 +2,7 @@ import { FAILURE, SUCCESS } from "../constants/constants.js";
 import {
   checkCommentService,
   commentService,
+  editCommentService,
   getBookDetailService,
   getBookService,
   getFilterService,
@@ -114,6 +115,27 @@ export const checkCommentController = async (req, res, next) => {
   try {
     const data = req.body;
     const result = await checkCommentService(data);
+    if (result) {
+      return res.status(200).json({
+        type: SUCCESS,
+        message: "Comment found successfully",
+        data: result,
+      });
+    } else {
+      return res.status(400).json({
+        type: FAILURE,
+        message: "No comment ",
+        errors: [],
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+export const editCommentController = async (req, res, next) => {
+  try {
+    const data = req.body;
+    const result = await editCommentService(data);
     if (result) {
       return res.status(200).json({
         type: SUCCESS,

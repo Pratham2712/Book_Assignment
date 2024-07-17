@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   checkCommentController,
   commentController,
+  editCommentController,
   getBookController,
   getBookDetailController,
   getFilterController,
@@ -15,3 +16,4 @@ bookRouter.get("/getFilter", getFilterController);
 bookRouter.post("/getBookDetail", getBookDetailController);
 bookRouter.post("/comment", verifyToken, commentController);
 bookRouter.post("/checkComment", verifyToken, checkCommentController);
+bookRouter.post("/editComment", verifyToken, editCommentController);

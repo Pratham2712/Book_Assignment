@@ -77,9 +77,8 @@ const Login = ({ loginOpen, setLoginOpen }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors},
+    formState: { errors },
     trigger,
-    watch,
     setValue,
     setError,
   } = useForm({

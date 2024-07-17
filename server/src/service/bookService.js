@@ -50,3 +50,21 @@ export const checkCommentService = async ({ userId, bookId }) => {
   });
   return res;
 };
+
+export const editCommentService = async ({
+  userId,
+  bookId,
+  comment,
+  rating,
+}) => {
+  if (!userId || !bookId || comment === undefined || rating === undefined) {
+    throw new Error("userId, bookId, comment, and rating are required");
+  }
+  const res = await reviewModel.findOneAndUpdate(
+    { userId: userId, bookId: bookId },
+    { $set: { comment: comment, rating: rating } },
+    { new: true }
+  );
+
+  return res;
+};
