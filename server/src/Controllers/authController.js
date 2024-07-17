@@ -50,8 +50,6 @@ export const loginController = async (req, res, next) => {
         .status(200)
         .cookie("USER_TOKEN", jwtToken, {
           expires: new Date(Date.now() + 1000 * 60 * 60),
-          sameSite: 'None',
-          secure: true,
         })
         .json({
           type: SUCCESS,
@@ -74,7 +72,7 @@ export const loginController = async (req, res, next) => {
 
 export const tokenLoginController = async (req, res, next) => {
   try {
-    const user = await getUser(req.body?._id);
+    const user = await getUser(req.body?.userId);
     if (user) {
       return res.status(200).json({
         type: SUCCESS,
@@ -114,8 +112,6 @@ export const signupController = async (req, res, next) => {
           .status(200)
           .cookie("USER_TOKEN", jwtToken, {
             expires: new Date(Date.now() + 1000 * 60 * 60),
-            sameSite: 'None',
-            secure: true,
           })
           .json({
             type: SUCCESS,
@@ -136,11 +132,14 @@ export const signupController = async (req, res, next) => {
 };
 
 export const logoutController = async (req, res, next) => {
-  return res.status(200).clearCookie("USER_TOKEN", {
-    sameSite: 'None',
-    secure: true,
-  }).json({
-    type: SUCCESS,
-    message: "Logout successfully",
-  });
+  return res
+    .status(200)
+    .clearCookie("USER_TOKEN", {
+      sameSite: "None",
+      secure: true,
+    })
+    .json({
+      type: SUCCESS,
+      message: "Logout successfully",
+    });
 };

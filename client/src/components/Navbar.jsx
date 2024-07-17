@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -16,55 +16,57 @@ import { createSearchParams, Link, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { USER_Root } from "../constants/links.js";
 import Login from "../pages/Login.jsx";
-import { logoutThunk } from "../redux/slices/UserInfoSlice.js";
-
+import {
+  checkUserLoginThunk,
+  logoutThunk,
+} from "../redux/slices/UserInfoSlice.js";
 
 const Search = styled("div")(({ theme }) => ({
-    position: "relative",
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
-    "&:hover": {
-      backgroundColor: alpha(theme.palette.common.white, 0.25),
-    },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(3),
+    width: "auto",
+  },
+}));
+
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
     width: "100%",
-    [theme.breakpoints.up("sm")]: {
-      marginLeft: theme.spacing(3),
-      width: "auto",
+    [theme.breakpoints.up("md")]: {
+      width: "40ch",
     },
-  }));
-  
-  const SearchIconWrapper = styled("div")(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }));
-  
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: "inherit",
-    "& .MuiInputBase-input": {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create("width"),
-      width: "100%",
-      [theme.breakpoints.up("md")]: {
-        width: "40ch",
-      },
-    },
-  }));
-  const StyledAppbar = styled(Toolbar)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  }));
+  },
+}));
+const StyledAppbar = styled(Toolbar)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
 const Navbar = () => {
-    const [anchorEl, setAnchorEl] = useState();
+  const [anchorEl, setAnchorEl] = useState();
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState();
   const [loginOpen, setLoginOpen] = useState(false);
   const [anchorEl2, setAnchorEl2] = useState();
@@ -77,8 +79,8 @@ const Navbar = () => {
   //function
   const getResult = (data) => {
     const params = Object.fromEntries(searchParams);
-        params["query"] = data.value;
-        setSearchParams(createSearchParams(params));
+    params["query"] = data.value;
+    setSearchParams(createSearchParams(params));
   };
 
   //useEffect
@@ -86,7 +88,8 @@ const Navbar = () => {
     const params = Object.fromEntries(searchParams);
     params["query"] = "";
     setSearchParams(createSearchParams(params));
-  },[])
+    dispatch(checkUserLoginThunk());
+  }, []);
 
   //useSelector
   const isLogin = useSelector(
@@ -96,7 +99,7 @@ const Navbar = () => {
     (state) => state.rootReducer.UserInfoSlice.data.userInfo.username
   );
 
- //function
+  //function
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
@@ -143,7 +146,6 @@ const Navbar = () => {
       ) : (
         <></>
       )}
-      
     </Menu>
   );
   //component - 2
@@ -164,7 +166,6 @@ const Navbar = () => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      
       <MenuItem>
         <Button
           variant="outlined"
@@ -177,7 +178,6 @@ const Navbar = () => {
           }}
         >
           {isLogin ? userName : "Login/Signup"}
-        
         </Button>
       </MenuItem>
 
@@ -200,86 +200,86 @@ const Navbar = () => {
     </Menu>
   );
 
-    return (
-        <Box sx={{ flexGrow: 0 }}>
-        <AppBar position="fixed" sx={{background:"#000814"}}>
-          <StyledAppbar>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{
-                display: { xs: "none", sm: "block" },
-                fontWeight: "bold",
-                cursor: "pointer",
-                textDecoration: "none",
-              }}
+  return (
+    <Box sx={{ flexGrow: 0 }}>
+      <AppBar position="fixed" sx={{ background: "#000814" }}>
+        <StyledAppbar>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              display: { xs: "none", sm: "block" },
+              fontWeight: "bold",
+              cursor: "pointer",
+              textDecoration: "none",
+            }}
+          >
+            <Link
+              to={USER_Root}
+              style={{ textDecoration: "none", color: "inherit" }}
             >
-              <Link
-                to={USER_Root}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                BOOKS
-              </Link>
-            </Typography>
-            <Box sx={{ flexGrow: 0.13 }} />
-            <Search ref={setAnchorEl2} sx={{ position: "relative" }}>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-                onChange={(e) => getResult(e.target)}
-                value={searchParams.get("query")}
-              />
-            </Search>
+              BOOKS
+            </Link>
+          </Typography>
+          <Box sx={{ flexGrow: 0.13 }} />
+          <Search ref={setAnchorEl2} sx={{ position: "relative" }}>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ "aria-label": "search" }}
+              onChange={(e) => getResult(e.target)}
+              value={searchParams.get("query")}
+            />
+          </Search>
 
-            <Box sx={{ flexGrow: 0.13 }} />
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <Button
-                variant="outlined"
-                sx={{ color: "white", borderColor: "white" }}
-                onClick={() => (!isLogin ? setLoginOpen(!loginOpen) : "")}
-              >
-                {isLogin ? userName : "Login/Signup"}
-              </Button>
-            </Box>
-            <Box sx={{ flexGrow: 0.13 }} />
-            
-            <Box sx={{ flexGrow: 0.13 }} />
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <IconButton
-                size="large"
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                ari44a-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-            </Box>
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="show more"
-                aria-controls={mobileMenuId}
-                aria-haspopup="true"
-                onClick={handleMobileMenuOpen}
-                color="inherit"
-              >
-                <MoreIcon />
-              </IconButton>
-            </Box>
-            {renderMobileMenu}
-            {renderMenu}
-          </StyledAppbar>
-        </AppBar>
-        <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen} />
-      </Box>
-    )
-}
+          <Box sx={{ flexGrow: 0.13 }} />
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Button
+              variant="outlined"
+              sx={{ color: "white", borderColor: "white" }}
+              onClick={() => (!isLogin ? setLoginOpen(!loginOpen) : "")}
+            >
+              {isLogin ? userName : "Login/Signup"}
+            </Button>
+          </Box>
+          <Box sx={{ flexGrow: 0.13 }} />
+
+          <Box sx={{ flexGrow: 0.13 }} />
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              ari44a-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+          </Box>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-label="show more"
+              aria-controls={mobileMenuId}
+              aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
+              color="inherit"
+            >
+              <MoreIcon />
+            </IconButton>
+          </Box>
+          {renderMobileMenu}
+          {renderMenu}
+        </StyledAppbar>
+      </AppBar>
+      <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen} />
+    </Box>
+  );
+};
 
 export default Navbar;

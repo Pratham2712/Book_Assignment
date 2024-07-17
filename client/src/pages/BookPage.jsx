@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getBookDetailThunk } from "../redux/slices/bookPageSlice";
+import {
+  checkCommentThunk,
+  commentThunk,
+  getBookDetailThunk,
+} from "../redux/slices/bookPageSlice";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
@@ -45,7 +49,15 @@ const BookPage = () => {
       book_id: id,
     };
     dispatch(getBookDetailThunk(data));
+    //dispatch(checkCommentThunk(data));
   }, []);
+
+  useEffect(() => {
+    const data = {
+      bookId: id,
+    };
+    dispatch(checkCommentThunk(data));
+  }, [isLogin]);
 
   //schema
   const schema = yup.object().shape({
@@ -82,9 +94,16 @@ const BookPage = () => {
   };
 
   const onSubmit = (data) => {
+    const info = {
+      comment: data?.comment,
+      rating: data?.rating,
+      bookId: id,
+    };
     if (!isLogin) {
       return setLoginOpen(!loginOpen);
     } else {
+      console.log(data);
+      dispatch(commentThunk(info));
     }
   };
   return (

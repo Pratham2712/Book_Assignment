@@ -11,7 +11,7 @@ export const verifyToken = async (req, res, next) => {
       );
       const user = await getUser(decryptedToken._id);
       if (user) {
-        req.body._id = user._id;
+        req.body.userId = user._id;
         req.body.username = user.username;
         next();
       } else {
