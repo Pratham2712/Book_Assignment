@@ -6,6 +6,7 @@ import {
   getBookController,
   getBookDetailController,
   getFilterController,
+  getReviewsController,
 } from "../Controllers/bookController.js";
 import { verifyToken } from "../middlewares/jwtMiddlewares.js";
 
@@ -17,3 +18,4 @@ bookRouter.post("/getBookDetail", getBookDetailController);
 bookRouter.post("/comment", verifyToken, commentController);
 bookRouter.post("/checkComment", verifyToken, checkCommentController);
 bookRouter.post("/editComment", verifyToken, editCommentController);
+bookRouter.post("/getReviews", getReviewsController);

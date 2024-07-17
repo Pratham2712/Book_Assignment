@@ -54,6 +54,18 @@ export const editCommentThunk = createAsyncThunk(
   }
 );
 
+export const getReviewsThunk = createAsyncThunk(
+  "/book/getReviews",
+  async (data) => {
+    try {
+      const res = await axios.post(`${BASE_URL}/book/getReviews`, data);
+      return res.data;
+    } catch (error) {
+      return error.response.data;
+    }
+  }
+);
+
 const initialState = {
   loading: false,
   updateDone: false,
@@ -69,12 +81,14 @@ const initialState = {
   data: {
     detail: {},
     comment: {},
+    reviews: [],
   },
   status: {
     getBookDetailThunk: IDLE,
     commentThunk: IDLE,
     checkCommentThunk: IDLE,
     editCommentThunk: IDLE,
+    getReviewsThunk: IDLE,
   },
 };
 
@@ -188,6 +202,32 @@ const bookPageSlice = createSlice({
       })
       .addCase(editCommentThunk.rejected, (state, action) => {
         state.status.editCommentThunk = ERROR;
+        state.loading = false;
+        state.errorData.message = action.error.message;
+      })
+      //getReviewsThunk===============================================================================================================
+      .addCase(getReviewsThunk.pending, (state, { payload }) => {
+        state.loading = false;
+      })
+      .addCase(getReviewsThunk.fulfilled, (state, { payload }) => {
+        switch (payload.type) {
+          case SUCCESS:
+            state.loading = false;
+            state.data.reviews = payload.data;
+            state.status.getReviewsThunk = FULFILLED;
+            break;
+          default:
+            state.loading = false;
+            state.errorData = {
+              message: payload.message,
+              type: payload.type,
+              errors: payload.errors,
+            };
+            break;
+        }
+      })
+      .addCase(getReviewsThunk.rejected, (state, action) => {
+        state.status.getReviewsThunk = ERROR;
         state.loading = false;
         state.errorData.message = action.error.message;
       });

@@ -132,14 +132,8 @@ export const signupController = async (req, res, next) => {
 };
 
 export const logoutController = async (req, res, next) => {
-  return res
-    .status(200)
-    .clearCookie("USER_TOKEN", {
-      sameSite: "None",
-      secure: true,
-    })
-    .json({
-      type: SUCCESS,
-      message: "Logout successfully",
-    });
+  return res.status(200).clearCookie("USER_TOKEN").json({
+    type: SUCCESS,
+    message: "Logout successfully",
+  });
 };

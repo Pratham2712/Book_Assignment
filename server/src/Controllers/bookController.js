@@ -6,6 +6,7 @@ import {
   getBookDetailService,
   getBookService,
   getFilterService,
+  getReviewsService,
 } from "../service/bookService.js";
 
 export const getBookController = async (req, res, next) => {
@@ -139,13 +140,35 @@ export const editCommentController = async (req, res, next) => {
     if (result) {
       return res.status(200).json({
         type: SUCCESS,
-        message: "Comment found successfully",
+        message: "Comment edited successfully",
         data: result,
       });
     } else {
       return res.status(400).json({
         type: FAILURE,
-        message: "No comment ",
+        message: "Failed to comment",
+        errors: [],
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getReviewsController = async (req, res, next) => {
+  try {
+    const data = req.body;
+    const result = await getReviewsService(data);
+    if (result) {
+      return res.status(200).json({
+        type: SUCCESS,
+        message: "Reviews fetch successfully",
+        data: result,
+      });
+    } else {
+      return res.status(400).json({
+        type: FAILURE,
+        message: "Failed to fetch",
         errors: [],
       });
     }

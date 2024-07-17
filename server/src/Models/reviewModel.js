@@ -15,6 +15,10 @@ const reviewSchema = new mongoose.Schema({
     type: [mongoose.Types.ObjectId],
     required: true,
   },
+  username: {
+    type: String,
+    required: true,
+  },
 });
 
 const reviewModel = mongoose.model("review", reviewSchema);

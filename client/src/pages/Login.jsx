@@ -132,7 +132,7 @@ const Login = ({ loginOpen, setLoginOpen }) => {
       <Snackbar
         open={showError}
         anchorOrigin={{ vertical, horizontal }}
-        autoHideDuration={3000}
+        autoHideDuration={2000}
         onClose={clearError}
       >
         <Alert
@@ -147,7 +147,7 @@ const Login = ({ loginOpen, setLoginOpen }) => {
       <Snackbar
         open={successMsg}
         anchorOrigin={{ vertical, horizontal }}
-        autoHideDuration={3000}
+        autoHideDuration={2000}
         onClose={() => {
           setSuccessMsg(false);
         }}

@@ -4,6 +4,7 @@ import {
   commentThunk,
   editCommentThunk,
   getBookDetailThunk,
+  getReviewsThunk,
 } from "../redux/slices/bookPageSlice";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -59,6 +60,9 @@ const BookPage = () => {
   const [text, setText] = useState(userComment?.comment || "");
   const isLogin = useSelector(
     (state) => state.rootReducer.UserInfoSlice.isLogin
+  );
+  const Reviews = useSelector(
+    (state) => state.rootReducer.bookPageSlice.data.reviews
   );
   const date = new Date(data.publishedDate);
   const formattedDate = date.toLocaleDateString("en-US", {
@@ -322,6 +326,7 @@ const BookPage = () => {
           border: "2px solid #000814",
           fontWeight: "bold",
           marginLeft: "2.5rem",
+          marginBottom: "1rem",
           "&:hover": {
             backgroundColor: "white",
             color: "#000814",
@@ -329,10 +334,36 @@ const BookPage = () => {
           },
         }}
         variant="contained"
-        //onClick={handleSubmit(onSubmit)}
+        onClick={() => dispatch(getReviewsThunk({ bookId: id }))}
       >
         All Comments
       </Button>
+      <Divider />
+      <Box sx={{ marginLeft: "2.5rem", marginTop: "1rem" }}>
+        {Reviews.map((ele) => {
+          return (
+            <Box sx={{ paddingBottom: "0.3rem" }}>
+              <span>
+                <Typography
+                  sx={{
+                    display: "inline-block",
+                    color: "blue",
+                    fontStyle: "italic",
+                    marginRight: "0.2rem",
+                  }}
+                >
+                  {ele?.username}
+                </Typography>
+                <Rating size="small" value={ele?.rating} readOnly />
+              </span>
+              <Typography sx={{ marginLeft: "0.5rem" }}>
+                --{ele?.comment}
+              </Typography>
+              <Divider />
+            </Box>
+          );
+        })}
+      </Box>
       <Divider />
       <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen}></Login>
     </Box>

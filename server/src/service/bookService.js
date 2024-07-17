@@ -68,3 +68,13 @@ export const editCommentService = async ({
 
   return res;
 };
+
+export const getReviewsService = async ({ bookId }) => {
+  if (!bookId) {
+    throw new Error("Both userId and bookId are required");
+  }
+  const res = await reviewModel.find({
+    bookId: bookId,
+  });
+  return res;
+};
