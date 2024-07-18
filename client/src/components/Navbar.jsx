@@ -11,10 +11,16 @@ import Menu from "@mui/material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
+import HomeIcon from "@mui/icons-material/Home";
 import { Button } from "@mui/material";
-import { createSearchParams, Link, useSearchParams } from "react-router-dom";
+import {
+  createSearchParams,
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { USER_Root } from "../constants/links.js";
+import { User_Home, USER_Root } from "../constants/links.js";
 import Login from "../pages/Login.jsx";
 import {
   checkUserLoginThunk,
@@ -75,6 +81,7 @@ const Navbar = () => {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   //function
   const getResult = (data) => {
@@ -166,6 +173,24 @@ const Navbar = () => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
+      <MenuItem>
+        <Typography
+          sx={{
+            color: "black",
+            borderColor: "black",
+            display: "flex",
+            alignItems: "center",
+          }}
+          onClick={() => {
+            navigate(USER_Root);
+          }}
+        >
+          <IconButton>
+            <HomeIcon sx={{ color: "black" }} />
+          </IconButton>
+          Home
+        </Typography>
+      </MenuItem>
       <MenuItem>
         <Button
           variant="outlined"

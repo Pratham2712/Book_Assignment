@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   checkCommentThunk,
   commentThunk,
@@ -6,7 +6,7 @@ import {
   getBookDetailThunk,
   getReviewsThunk,
 } from "../redux/slices/bookPageSlice";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 
@@ -14,6 +14,7 @@ import {
   Alert,
   Box,
   Button,
+  createTheme,
   Divider,
   LinearProgress,
   Rating,
@@ -29,8 +30,21 @@ import Login from "./Login";
 import { SUCCESS } from "../constants/constants";
 
 const BookPage = () => {
+  const theme = createTheme({
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 600,
+        md: 960,
+        lg: 1280,
+        xl: 1920,
+      },
+    },
+  });
+  const navigate = useNavigate();
   const [loginOpen, setLoginOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState({ type: false, msg: "" });
+  const sectionRef = useRef(null);
   const [state, setState] = useState({
     open: false,
     vertical: "top",
@@ -87,6 +101,10 @@ const BookPage = () => {
     const data = {
       bookId: id,
     };
+    setRate(userComment?.rating);
+    setText(userComment?.comment);
+    setValue("rating", userComment?.rating);
+    setValue("comment", userComment?.comment);
     dispatch(checkCommentThunk(data));
   }, [isLogin]);
 
@@ -161,22 +179,12 @@ const BookPage = () => {
     }
   };
   return (
-    <Box sx={{ paddingTop: "3rem", overflowY: "auto" }}>
-      <Snackbar
-        open={successMsg.type}
-        anchorOrigin={{ vertical, horizontal }}
-        autoHideDuration={2000}
-        onClose={() => {
-          setSuccessMsg((prevSuccessMsg) => ({
-            ...prevSuccessMsg,
-            type: false,
-            msg: "",
-          }));
-        }}
-      >
-        <Alert
-          severity="success"
-          variant="filled"
+    <>
+      <Box sx={{ paddingTop: "3rem", overflowY: "auto" }}>
+        <Snackbar
+          open={successMsg.type}
+          anchorOrigin={{ vertical, horizontal }}
+          autoHideDuration={2000}
           onClose={() => {
             setSuccessMsg((prevSuccessMsg) => ({
               ...prevSuccessMsg,
@@ -184,189 +192,256 @@ const BookPage = () => {
               msg: "",
             }));
           }}
-          sx={{ width: "100%" }}
         >
-          {successMsg.msg}
-        </Alert>
-      </Snackbar>
-      <Navbar />
-      {loading ? (
-        <Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
-          <LinearProgress
-            color="inherit"
-            sx={{ top: "30%", zIndex: "100", width: "30%", left: "35%" }}
-          />
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            padding: "0rem 3rem",
-            height: "100vh",
-          }}
-        >
-          <Box sx={{ marginRight: "2rem" }}>
-            <img
-              style={{ width: "400px", height: "500px", paddingTop: "3rem" }}
-              src={data?.cover?.[0]}
+          <Alert
+            severity="success"
+            variant="filled"
+            onClose={() => {
+              setSuccessMsg((prevSuccessMsg) => ({
+                ...prevSuccessMsg,
+                type: false,
+                msg: "",
+              }));
+            }}
+            sx={{ width: "100%" }}
+          >
+            {successMsg.msg}
+          </Alert>
+        </Snackbar>
+        <Navbar />
+        {loading ? (
+          <Box sx={{ width: "100%", height: "100vh", position: "absolute" }}>
+            <LinearProgress
+              color="inherit"
+              sx={{ top: "30%", zIndex: "100", width: "30%", left: "35%" }}
             />
           </Box>
+        ) : (
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-evenly",
-              paddingTop: "2rem",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: "0rem 3rem",
+              height: "auto",
+              [theme.breakpoints?.down("md")]: {
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "space-evenly",
+                padding: "0rem 2rem",
+              },
             }}
           >
-            <Typography variant="h4">{data?.title}</Typography>
-            <Typography sx={{ heigth: "2 rem" }}>
-              {displayText}
-              {!expanded && wordsArray?.length > maxWords && (
-                <span
-                  onClick={() => setExpanded(!expanded)}
-                  style={{ cursor: "pointer", color: "blue" }}
-                >
-                  &nbsp;... Read more
-                </span>
-              )}
-              {expanded && (
-                <span
-                  onClick={() => setExpanded(!expanded)}
-                  style={{ cursor: "pointer", color: "blue" }}
-                >
-                  &nbsp; Show less
-                </span>
-              )}
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Typography variant="h6">Published Date : </Typography>
-                <Typography sx={{ paddingTop: "0.2rem" }}>
-                  {formattedDate}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Typography variant="h6">Language : </Typography>
-                <Typography sx={{ paddingTop: "0.2rem" }}>
-                  {data?.language}
-                </Typography>
-              </Box>
-            </Box>
-            <Box>
-              <Box sx={{ marginBottom: "0.5rem" }}>
-                <Typography>Review</Typography>
-                <span>
-                  <Rating
-                    size="large"
-                    {...register("rating")}
-                    onBlur={handleBlur}
-                    value={rate}
-                    onChange={(event, newValue) => {
-                      setValue("rating", newValue);
-                      trigger("rating");
-                      setRate(newValue);
-                    }}
-                  />
-                </span>
-              </Box>
-              <Box>
-                <TextField
-                  id="outlined-multiline-flexible"
-                  label={userComment?.comment ? "" : "Comment"}
-                  name="comment"
-                  multiline
-                  rows={4}
-                  size="large"
-                  sx={{ width: "50%" }}
-                  {...register("comment")}
-                  onBlur={handleBlur}
-                  value={text}
-                  onChange={(e) => {
-                    setText(e.target.value);
-                    setValue("comment", e.target.value);
-                    trigger("comment");
-                  }}
-                />
-                <Typography sx={{ height: "1.5rem", fontSize: "0.8rem" }}>
-                  <ErrorMessage
-                    errors={errors}
-                    name="comment"
-                    render={({ message }) => (
-                      <span style={{ color: "maroon" }}>{message}</span>
-                    )}
-                  />
-                </Typography>
-              </Box>
-              <Button
+            <Box
+              sx={{
+                marginRight: "2rem",
+                [theme.breakpoints?.down("md")]: {
+                  marginRight: "0rem",
+                },
+              }}
+            >
+              <Box
+                component="img"
                 sx={{
-                  background: "#000814",
-                  border: "2px solid #000814",
-                  fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "white",
-                    color: "#000814",
-                    border: "2px solid #000814",
+                  width: "400px",
+                  height: "500px",
+                  paddingTop: "3rem",
+                  [theme.breakpoints.down("sm")]: {
+                    width: "350px",
+                    height: "350px",
                   },
                 }}
-                variant="contained"
-                onClick={handleSubmit(onSubmit)}
-              >
-                {userComment?.comment || userComment?.rating ? "Edit" : "Post"}
-              </Button>
+                src={data?.cover?.[0]}
+                alt="Cover"
+              />
             </Box>
-          </Box>
-        </Box>
-      )}
-      <Button
-        sx={{
-          background: "#000814",
-          border: "2px solid #000814",
-          fontWeight: "bold",
-          marginLeft: "2.5rem",
-          marginBottom: "1rem",
-          "&:hover": {
-            backgroundColor: "white",
-            color: "#000814",
-            border: "2px solid #000814",
-          },
-        }}
-        variant="contained"
-        onClick={() => dispatch(getReviewsThunk({ bookId: id }))}
-      >
-        All Comments
-      </Button>
-      <Divider />
-      <Box sx={{ marginLeft: "2.5rem", marginTop: "1rem" }}>
-        {Reviews.map((ele) => {
-          return (
-            <Box sx={{ paddingBottom: "0.3rem" }}>
-              <span>
-                <Typography
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-evenly",
+                paddingTop: "2rem",
+              }}
+            >
+              <Typography variant="h4">{data?.title}</Typography>
+              <Typography sx={{ heigth: "2 rem" }}>
+                {displayText}
+                {!expanded && wordsArray?.length > maxWords && (
+                  <span
+                    onClick={() => setExpanded(!expanded)}
+                    style={{ cursor: "pointer", color: "blue" }}
+                  >
+                    &nbsp;... Read more
+                  </span>
+                )}
+                {expanded && (
+                  <span
+                    onClick={() => setExpanded(!expanded)}
+                    style={{ cursor: "pointer", color: "blue" }}
+                  >
+                    &nbsp; Show less
+                  </span>
+                )}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  marginTop: "1rem",
+                  [theme.breakpoints?.down("sm")]: {
+                    flexDirection: "column",
+                    justifyContent: "left",
+                  },
+                }}
+              >
+                <Box
                   sx={{
-                    display: "inline-block",
-                    color: "blue",
-                    fontStyle: "italic",
-                    marginRight: "0.2rem",
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  {ele?.username}
-                </Typography>
-                <Rating size="small" value={ele?.rating} readOnly />
-              </span>
-              <Typography sx={{ marginLeft: "0.5rem" }}>
-                --{ele?.comment}
-              </Typography>
-              <Divider />
+                  <Typography variant="h6">Published Date : </Typography>
+                  <Typography sx={{ paddingTop: "0.2rem" }}>
+                    {formattedDate}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography variant="h6">Language : </Typography>
+                  <Typography sx={{ paddingTop: "0.2rem" }}>
+                    {data?.language}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box>
+                <Box sx={{ marginBottom: "0.5rem", marginTop: "1rem" }}>
+                  <Typography>Review</Typography>
+                  <span>
+                    <Rating
+                      size="large"
+                      {...register("rating")}
+                      onBlur={handleBlur}
+                      value={rate}
+                      onChange={(event, newValue) => {
+                        setValue("rating", newValue);
+                        trigger("rating");
+                        setRate(newValue);
+                      }}
+                    />
+                  </span>
+                </Box>
+                <Box>
+                  <TextField
+                    id="outlined-multiline-flexible"
+                    label={userComment?.comment ? "" : "Comment"}
+                    name="comment"
+                    multiline
+                    rows={4}
+                    size="large"
+                    sx={{
+                      width: "50%",
+                      [theme.breakpoints?.down("md")]: {
+                        width: "100%",
+                      },
+                    }}
+                    {...register("comment")}
+                    onBlur={handleBlur}
+                    value={text}
+                    onChange={(e) => {
+                      setText(e.target.value);
+                      setValue("comment", e.target.value);
+                      trigger("comment");
+                    }}
+                  />
+                  <Typography sx={{ height: "1.5rem", fontSize: "0.8rem" }}>
+                    <ErrorMessage
+                      errors={errors}
+                      name="comment"
+                      render={({ message }) => (
+                        <span style={{ color: "maroon" }}>{message}</span>
+                      )}
+                    />
+                  </Typography>
+                </Box>
+                <Button
+                  sx={{
+                    background: "#000814",
+                    border: "2px solid #000814",
+                    fontWeight: "bold",
+                    "&:hover": {
+                      backgroundColor: "white",
+                      color: "#000814",
+                      border: "2px solid #000814",
+                    },
+                  }}
+                  variant="contained"
+                  onClick={handleSubmit(onSubmit)}
+                >
+                  {userComment?.comment || userComment?.rating
+                    ? "Edit"
+                    : "Post"}
+                </Button>
+              </Box>
             </Box>
-          );
-        })}
+          </Box>
+        )}
+        <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen}></Login>
       </Box>
-      <Divider />
-      <Login loginOpen={loginOpen} setLoginOpen={setLoginOpen}></Login>
-    </Box>
+      <Box
+        sx={{
+          marginTop: "2rem",
+        }}
+      >
+        <Button
+          sx={{
+            background: "#000814",
+            border: "2px solid #000814",
+            fontWeight: "bold",
+            marginLeft: "2.5rem",
+            "&:hover": {
+              backgroundColor: "white",
+              color: "#000814",
+              border: "2px solid #000814",
+            },
+          }}
+          variant="contained"
+          onClick={() => {
+            dispatch(getReviewsThunk({ bookId: id })).then((data) => {
+              if (data.payload.type === SUCCESS) {
+                sectionRef?.current?.scrollIntoView({ behavior: "smooth" });
+              }
+            });
+          }}
+        >
+          All Comments
+        </Button>
+        <Divider />
+        <Box sx={{ marginLeft: "2.5rem", marginTop: "1rem" }}>
+          {Reviews.map((ele) => {
+            return (
+              <Box sx={{ paddingBottom: "0.3rem" }}>
+                <span>
+                  <Typography
+                    sx={{
+                      display: "inline-block",
+                      color: "blue",
+                      fontStyle: "italic",
+                      marginRight: "0.2rem",
+                    }}
+                  >
+                    {ele?.username}
+                  </Typography>
+                  <Rating size="small" value={ele?.rating} readOnly />
+                </span>
+                <Typography sx={{ marginLeft: "0.5rem" }} ref={sectionRef}>
+                  --{ele?.comment}
+                </Typography>
+                <Divider />
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+    </>
   );
 };
 

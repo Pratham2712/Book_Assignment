@@ -110,6 +110,7 @@ const bookPageSlice = createSlice({
         switch (payload.type) {
           case SUCCESS:
             state.data.detail = payload.data;
+            state.data.reviews = [];
             state.loading = false;
             state.status.getBookDetailThunk = FULFILLED;
             break;
