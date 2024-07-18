@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import { useDispatch } from "react-redux";
 import { getFilterThunk } from "../redux/slices/bookSlice";
 import Filter from "../components/Filter";
+import Banner from "../components/Banner";
 
 const Home = () => {
   const [open, setOpen] = useState(false);

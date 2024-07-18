@@ -20,7 +20,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { User_Home, USER_Root } from "../constants/links.js";
+import { USER_Root } from "../constants/links.js";
 import Login from "../pages/Login.jsx";
 import {
   checkUserLoginThunk,

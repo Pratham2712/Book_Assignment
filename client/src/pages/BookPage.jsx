@@ -6,7 +6,7 @@ import {
   getBookDetailThunk,
   getReviewsThunk,
 } from "../redux/slices/bookPageSlice";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 
@@ -41,7 +41,6 @@ const BookPage = () => {
       },
     },
   });
-  const navigate = useNavigate();
   const [loginOpen, setLoginOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState({ type: false, msg: "" });
   const sectionRef = useRef(null);
